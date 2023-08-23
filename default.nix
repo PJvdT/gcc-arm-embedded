@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
   pname = "gcc-arm-embedded";
   version = "4.7";
   target = "arm-none-eabi";
-  target-cpu = "coretex-m4";
+  target-cpu = "cortex-m4";
 
   suffix = {
     x86_64-linux  = "x86_64_arm-linux";
@@ -28,8 +28,7 @@ stdenv.mkDerivation rec {
     }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");    
   };
 
-## output = [ "out"  ]; 
-  output = [ ];
+  output = [ "out" "lib" "man" "info" ]; 
 
   dontPatchELF = true;
   dontStrip = true;
@@ -38,25 +37,22 @@ stdenv.mkDerivation rec {
   buildInputs = [ git zlib gmp mpfr libmpc ];
 
   configurePhase = ''
-      export PATH=$PATH:/nix/store/16hhvdjl0c7z2zindhg3jzy4r7bfh22d-binutils-arm-embedded-2.24/bin
-      ./configure --target=${target} --prefix=$out/ \
-                  --with-cpu=${target-cpu} --disable-werror \
-                  --enable-languages=c,c++ --without-headers --with-glibc \
-                  --with-no-thumb-interwork --with-mode=thumb
+      ./configure --target=${target} --prefix=$out \
+                  --with-cpu=${target-cpu} --enable-languages=c,c++ \
+                  --without-headers --with-glibc \
+                  --with-no-thumb-interwork --with-mode=thumb --disable-werror 
   '';
 
   buildPhase = ''
-      export PATH=$PATH:/nix/store/16hhvdjl0c7z2zindhg3jzy4r7bfh22d-binutils-arm-embedded-2.24/bin
       make  all-gcc 2>&1 | tee ./binutils-build-logs.log
   '';
 
   installPhase = ''
-      export PATH=$PATH:/nix/store/16hhvdjl0c7z2zindhg3jzy4r7bfh22d-binutils-arm-embedded-2.24/bin
       make  install-gcc 2>&1 | tee ./binutils-build-logs.log
   '';
 
   env = {
-
+     CFLAGS="-Wno-error";
      MY_RVDT_GCC_PATH="/home/ronald/src/toolchain/build/binutils-build/result/bin"; 
      _PATH="/home/ronald/src/toolchain/build/binutils-build/result/bin";
      DIRENV_DISABLE="true";
