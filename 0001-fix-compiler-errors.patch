@@ -13,19 +13,19 @@ index ef1ed083d32..ba0c487a603 100644
  const char * libc_name_p (const char *, unsigned int);
  %}
 diff --git gcc/cp/cfns.h gcc/cp/cfns.h
-index 62cdfab93aa..7da9ad19330 100644
+index 62cdfab93aa..2fb9b4632b9 100644
 --- gcc/cp/cfns.h
 +++ gcc/cp/cfns.h
-@@ -59,6 +59,9 @@ const char * libc_name_p (const char *, unsigned int);
- 
+@@ -53,6 +53,9 @@ __inline
+ static unsigned int hash (const char *, unsigned int);
  #ifdef __GNUC__
  __inline
 +#ifdef __GNUC_STDC_INLINE__
 +__attribute__ ((__gnu_inline__))
 +#endif
- #else
- #ifdef __cplusplus
- inline
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ /* maximum key range = 391, duplicates = 0 */
 diff --git libcpp/expr.c libcpp/expr.c
 index d56e56a6311..4c2a69a445c 100644
 --- libcpp/expr.c
