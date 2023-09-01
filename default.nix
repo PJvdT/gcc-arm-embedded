@@ -1,5 +1,5 @@
 { lib
-, stdenv
+, stdenvNoCC
 , fetchgit
 , ncurses5
 , zlib
@@ -7,25 +7,29 @@
 , gmp
 , mpfr
 , libmpc
+, bison
+, flex
+, gcc6
 #, binutils-arm-embedded
 , ...
 }:
 
-stdenv.mkDerivation rec {
+stdenvNoCC.mkDerivation rec {
   pname = "gcc-arm-embedded";
   version = "4.7";
   target = "arm-none-eabi";
   target-cpu = "cortex-m4";
 
+
   suffix = {
     x86_64-linux  = "x86_64_arm-linux";
-  }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  }.${stdenvNoCC.hostPlatform.system} or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
   src = fetchgit {
     url = "git://gcc.gnu.org/git/gcc.git";
     rev = "911595bf2d485c0d1e067d9a94a867d9b8281502";
     sha256 = {
       x86_64-linux  = "sha256-7lx32YAb5kxSYKD5R6qGMgyGaW4A1YNfZGOvjmT9MRU=";
-    }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");    
+    }.${stdenvNoCC.hostPlatform.system} or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");    
   };
 
   output = [ "out" "lib" "man" "info" ]; 
@@ -34,13 +38,18 @@ stdenv.mkDerivation rec {
   dontStrip = true;
 
 #  buildInputs = [ git zlib gmp mpfr libmpc binutils-arm-embedded ];
-  buildInputs = [ git zlib gmp mpfr libmpc ];
+  buildInputs = [ gcc6 git zlib gmp mpfr libmpc bison flex ];
 
   configurePhase = ''
       ./configure --target=${target} --prefix=$out \
                   --with-cpu=${target-cpu} --enable-languages=c,c++ \
                   --without-headers --with-glibc \
                   --with-no-thumb-interwork --with-mode=thumb --disable-werror 
+  '';
+
+  patches = [ ./0001-fix-compiler-errors.patch ];
+  patchPhase = ''
+      patch -p1 < ../0001-fix-compiler-errors.patch
   '';
 
   buildPhase = ''
