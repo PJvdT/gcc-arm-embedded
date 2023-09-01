@@ -10,6 +10,7 @@
 , bison
 , flex
 , gcc6
+, texinfo
 #, binutils-arm-embedded
 , ...
 }:
@@ -38,7 +39,7 @@ stdenvNoCC.mkDerivation rec {
   dontStrip = true;
 
 #  buildInputs = [ git zlib gmp mpfr libmpc binutils-arm-embedded ];
-  buildInputs = [ gcc6 git zlib gmp mpfr libmpc bison flex ];
+  buildInputs = [ gcc6 git zlib gmp mpfr libmpc bison flex texinfo ];
 
   configurePhase = ''
       ./configure --target=${target} --prefix=$out \
@@ -47,10 +48,10 @@ stdenvNoCC.mkDerivation rec {
                   --with-no-thumb-interwork --with-mode=thumb --disable-werror 
   '';
 
-  patches = [ ./0001-fix-compiler-errors.patch ];
-  patchPhase = ''
-      patch -p1 < ../0001-fix-compiler-errors.patch
-  '';
+  patches = [ 
+    ./0001-fix-compiler-errors.patch 
+  ];
+  patchFlags = "-p0 ";
 
   buildPhase = ''
       make  all-gcc 2>&1 | tee ./binutils-build-logs.log
